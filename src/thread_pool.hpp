@@ -54,7 +54,10 @@
 #include <cassert>
 #include <cstring>
 #include <stdint.h>
-#include <pthread.h>
+
+#include "lock.hpp"
+#include "thread.hpp"
+#include "monitor.hpp"
 
 
 
@@ -96,78 +99,78 @@ public:
     if (stop_) {
       task_list_.push(new_work);
     } else {
-      pthread_mutex_lock(&task_mutex_);
-          
+      lock_.lock();
+      
       task_list_.push(new_work);
-      pthread_cond_signal(&task_cond_);
-          
-      pthread_mutex_unlock(&task_mutex_);
+      mon_.signal();
+      
+      lock_.unlock();
     }
   }
-
+  
   void stop()
   {
     stop_ = true;
   }
-
+  
   void start() 
   { 
-    assert(pthread_mutex_init(&task_mutex_, NULL) == 0);
-    assert(pthread_cond_init(&task_cond_, NULL) == 0);
+    assert(lock_.init() == 0);
+    assert(mon_.init() == 0);
     stop_ = false;
     
     for (uint32_t i = 0; i < thread_list_.size(); ++i) {
-      assert(pthread_create(&thread_list_[i], NULL, threadEntry, this) == 0);
+      assert(thread_list_[i].spawn("Worker Thread", threadEntry, this) == 0);
     } 
-
+    
   }
-
-
+  
+  
 private:
-
+  
   static void *threadEntry(void *opaque)
   {
     static_cast<ThreadPool *>(opaque)->doWork();
   }
-
+  
   void doWork() 
   {
     task_st *work = NULL;
     while (true) {
       
-      pthread_mutex_lock(&task_mutex_);
-
+      lock_.lock();
+      
       while (task_list_.empty()) {
-	    if (stop_) {
-	      pthread_mutex_unlock(&task_mutex_);
-          pthread_exit(NULL);
-	    } 
+	if (stop_) {
+	  lock_.unlock();
+	  Thread::exit();
+	} 
 	
-        pthread_cond_wait(&task_cond_, &task_mutex_);
+        mon_.wait(lock_);
       }
-
-
+      
+      
       work = task_list_.front();
       task_list_.pop();
-
-      pthread_mutex_unlock(&task_mutex_);
-
+      
+      lock_.unlock();
+      
       
       if (work) { 
-	    while (work->run_count) {
-	      work->fp(work->opaque);
-	      --work->run_count;
-	    }
+	while (work->run_count) {
+	  work->fp(work->opaque);
+	  --work->run_count;
+	}
         
         delete work;
-	    work = NULL;
+	work = NULL;
 	
       } else {
-	    //TODO: Log some error
+	//TODO: Log some error
       }
     }
   }
-
+  
   inline void cpuid(uint32_t &eax, uint32_t &ebx, uint32_t &ecx, uint32_t &edx) 
   {
     asm ( "cpuid;"
@@ -175,7 +178,7 @@ private:
 	  : "a"   (eax), "c"  (0)
 	);
   }
-
+  
   uint32_t num_cores() 
   {
     uint32_t eax, ebx, ecx, edx;
@@ -204,16 +207,16 @@ private:
       cpuid(eax, ebx, ecx, edx);
       cores = ((unsigned)(ecx & 0xff)) + 1;
     }
-     
+    
     return (cores);
   }
+  
 
 
-
-  std::vector<pthread_t> thread_list_;
+  std::vector<Thread> thread_list_;
   std::queue<task_st *> task_list_;
-  pthread_mutex_t task_mutex_;
-  pthread_cond_t task_cond_;
+  Lock lock_;
+  Monitor mon_;
   bool stop_;
 
 };
