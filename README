@@ -1,11 +1,14 @@
 A thread pool manager, written in C++
 
+Thread Pool is templatized so you can write your own lock/monitor/thread classes and use those. An
+example interface layer is provided.
+
 
 example usage:
 
 1. create a ThreadPool object:
 
-ThreadPool pool = ThreadPool();
+ThreadPool<Thread, Monitor, Lock>  pool = ThreadPool<...>();
 
 
 2. Add some tasks
