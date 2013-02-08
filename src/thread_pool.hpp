@@ -80,16 +80,16 @@ typedef struct task_st {
 class ThreadPool {
 
 public:
-  ThreadPool(uint32_t num_threads) : thread_list_(num_threads), stop_(true) {}
+  ThreadPool(const uint32_t num_threads) : thread_list_(num_threads), stop_(true) {}
 
   ThreadPool() : thread_list_(num_cores()), stop_(true) {}
 
-  void addWork(task_st *work) 
+  void addWork(const task_st *work) 
   {
     addWork(work->fp, work->opaque, work->run_count);    
   }
     
-  void addWork(void (*fp)(void *), void *opaque, uint32_t run_count)
+  void addWork(void (*fp)(void *), void *opaque, const uint32_t &run_count)
   {
     task_st *new_work = new task_st();
     new_work->fp = fp;
@@ -173,7 +173,7 @@ private:
     }
   }
   
-  inline void cpuid(uint32_t &eax, uint32_t &ebx, uint32_t &ecx, uint32_t &edx) 
+  inline void cpuid(uint32_t &eax, uint32_t &ebx, uint32_t &ecx, uint32_t &edx) const
   {
     asm ( "cpuid;"
 	  :  "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
@@ -181,7 +181,7 @@ private:
 	);
   }
   
-  uint32_t num_cores() 
+  uint32_t num_cores() const
   {
     uint32_t eax, ebx, ecx, edx;
     char vendor[13];

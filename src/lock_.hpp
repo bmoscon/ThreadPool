@@ -59,7 +59,7 @@ class Lock_ {
   
 public:
   
-  virtual int init(LockTypes type = DEFAULT) = 0;
+  virtual int init(const LockTypes type = DEFAULT) = 0;
   virtual int lock() = 0;
   virtual int unlock() = 0;
   

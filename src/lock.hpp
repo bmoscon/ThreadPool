@@ -59,7 +59,7 @@ class Lock : Lock_ {
   
 public:
   
-  virtual int init(LockTypes type = DEFAULT)
+  virtual int init(const LockTypes type = DEFAULT)
   {
     pthread_mutexattr_t mutex_attr;
 
