@@ -110,7 +110,9 @@ public:
   
   void stop()
   {
+    lock_.lock();
     stop_ = true;
+    lock_.unlock();
   }
   
   void start() 
