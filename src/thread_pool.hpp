@@ -55,10 +55,6 @@
 #include <cstring>
 #include <stdint.h>
 
-#include "lock.hpp"
-#include "thread.hpp"
-#include "monitor.hpp"
-
 
 
 typedef struct task_st {
@@ -77,6 +73,7 @@ typedef struct task_st {
 } task_st;
 
 
+template <class T, class M, class L>
 class ThreadPool {
 
 public:
@@ -145,7 +142,7 @@ private:
       while (task_list_.empty()) {
 	if (stop_) {
 	  lock_.unlock();
-	  Thread::exit();
+	  T::exit();
 	} 
 	
         mon_.wait(lock_);
@@ -215,10 +212,10 @@ private:
   
 
 
-  std::vector<Thread> thread_list_;
+  std::vector<T> thread_list_;
   std::queue<task_st *> task_list_;
-  Lock lock_;
-  Monitor mon_;
+  L lock_;
+  M mon_;
   bool stop_;
 
 };

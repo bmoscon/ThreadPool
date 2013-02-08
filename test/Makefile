@@ -6,7 +6,7 @@
 thread_pool_test: thread_pool_test.o
 	g++ -o thread_pool_test thread_pool_test.o -lpthread
 
-thread_pool_test.o: thread_pool_test.cpp ../src/thread_pool.hpp
+thread_pool_test.o: thread_pool_test.cpp ../src/thread_pool.hpp ../src/thread.hpp ../src/lock.hpp ../src/monitor.hpp
 	g++ -c thread_pool_test.cpp
 
 clean:

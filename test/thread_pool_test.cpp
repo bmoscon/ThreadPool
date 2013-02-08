@@ -53,6 +53,9 @@
 #include <iostream>
 #include <unistd.h>
 
+#include "../src/thread.hpp"
+#include "../src/monitor.hpp"
+#include "../src/lock.hpp"
 #include "../src/thread_pool.hpp"
 
 
@@ -68,7 +71,7 @@ void work(void *data) {
 
 int main() {
 
-  ThreadPool pool = ThreadPool();
+  ThreadPool<Thread, Monitor, Lock> pool = ThreadPool<Thread, Monitor, Lock>();
 
   task_st *task = new task_st;
   task->fp = &work;
