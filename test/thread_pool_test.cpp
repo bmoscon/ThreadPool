@@ -51,8 +51,10 @@
 
 
 #include <iostream>
-#include "thread_pool.hpp"
 #include <unistd.h>
+
+#include "../src/thread_pool.hpp"
+
 
 void work(void *data) {
   for(int i = 0; i < 100; ++i) {
