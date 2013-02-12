@@ -81,6 +81,15 @@ public:
 
   ThreadPool() : thread_list_(num_cores()), stop_(true) {}
 
+  ~ThreadPool()
+  {
+    stop();
+    while (task_list_.size()) {
+      delete task_list_.front();
+      task_list_.pop();
+    }
+  }
+
   void addWork(const task_st *work) 
   {
     addWork(work->fp, work->opaque, work->run_count);    
