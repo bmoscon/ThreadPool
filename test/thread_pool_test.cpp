@@ -89,6 +89,7 @@ int main() {
   pool.addWork(&work, NULL, 10);
   pool.addWork(&work, NULL, 10);
   pool.addWork(&work, NULL, 10);
+  pool.addWork(&work, NULL);
   pool.addWork(task);
   delete task;
   sleep(20);
