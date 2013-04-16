@@ -95,7 +95,7 @@ public:
     addWork(work->fp, work->opaque, work->run_count);    
   }
     
-  void addWork(void (*fp)(void *), void *opaque, const uint32_t &run_count)
+  void addWork(void (*fp)(void *), void *opaque, uint32_t run_count = 1)
   {
     task_st *new_work = new task_st();
     new_work->fp = fp;
