@@ -139,6 +139,8 @@ private:
   static void *threadEntry(void *opaque)
   {
     static_cast<ThreadPool *>(opaque)->doWork();
+    
+    return (NULL);
   }
   
   void doWork() 

@@ -51,15 +51,14 @@
 
 
 #include <iostream>
+#include <cassert>
 #include <unistd.h>
+#include <thread>
 
-#include "../src/thread.hpp"
-#include "../src/monitor.hpp"
-#include "../src/lock.hpp"
-#include "../src/thread_pool.hpp"
+#include "thread_pool.hpp"
 
 
-void work(void *data) {
+void work() {
   for(int i = 0; i < 100; ++i) {
     if (i == 56) {
       std::cout << "count is 56!\n\n";
@@ -71,29 +70,11 @@ void work(void *data) {
 
 int main() {
 
-  ThreadPool<Thread, Monitor, Lock> pool = ThreadPool<Thread, Monitor, Lock>();
+  ThreadPool pool;
 
-  task_st *task = new task_st;
-  task->fp = &work;
-  task->opaque = NULL;
-  task->run_count = 10;
-
+  pool.addWork(&work);
   pool.start();
-  pool.addWork(&work, NULL, 10);
-  pool.addWork(&work, NULL, 10);
-  pool.addWork(&work, NULL, 10);
-  pool.addWork(&work, NULL, 10);
-  pool.addWork(&work, NULL, 10);
-  pool.addWork(&work, NULL, 10);
-  pool.addWork(&work, NULL, 10);
-  pool.addWork(&work, NULL, 10);
-  pool.addWork(&work, NULL, 10);
-  pool.addWork(&work, NULL, 10);
-  pool.addWork(&work, NULL);
-  pool.addWork(task);
-  delete task;
-  sleep(20);
-  pool.stop();
-  
+
+  sleep(3);
   return(0);
 }
