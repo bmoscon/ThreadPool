@@ -4,7 +4,7 @@
 
 
 thread_pool_test: ../thread_pool.hpp thread_pool_test.cpp
-	g++ -ggdb3 -Wall -Wextra -I../ -o thread_pool_test thread_pool_test.cpp -std=c++11 -pthread -Wl,--no-as-needed
+	g++ -ggdb3 -Wall -Wextra -I../src -o thread_pool_test thread_pool_test.cpp -std=c++11 -pthread
 
 clean:
-	rm thread_pool_test
+	rm -f thread_pool_test
