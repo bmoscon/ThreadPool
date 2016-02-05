@@ -5,7 +5,7 @@
  * Thread Pool Definitions
  *
  *
- * Copyright (C) 2012-2013  Bryant Moscon - bmoscon@gmail.com
+ * Copyright (C) 2012-2016  Bryant Moscon - bmoscon@gmail.com
  * 
  * Please see the LICENSE file for the terms and conditions 
  * associated with this software.
@@ -26,99 +26,93 @@
 #include <thread>
 
 
-typedef struct task_st {
-    void (*fp)();
-} task_st;
+
+typedef void (*work_fn)();
+
 
 
 class ThreadPool {
     
 public:
-    ThreadPool() : mon_(), stop_(true), thread_count_(0) {}
-    ThreadPool(uint32_t t) : stop_(true), thread_count_(t) {}
+    ThreadPool() : _mon(), _stop(true), _thread_count(0) {}
+    ThreadPool(uint32_t t) : stop_(true), _thread_count(t) {}
     ~ThreadPool()
     {
 	stop();
+	for (uint32_t i = 0; i < _thread_count; ++i) {
+	    _thread_list[i].join();
+	}
     }
     
     void start()
     {
-	lock_.lock();
-	stop_ = false;
+	_lock.lock();
+	_stop = false;
 	
-	if (!thread_count_) {
-	    thread_count_ = std::thread::hardware_concurrency();
-	    assert(thread_count_ > 0);
+	if (!_thread_count) {
+	    _thread_count = std::thread::hardware_concurrency();
+	    assert(_thread_count > 0);
 	}
 	
-	for (unsigned int i = 0; i < thread_count_; ++i) {
-	    thread_list_.push_back(std::thread(&ThreadPool::threadEntry, this));
-	    thread_list_[i].detach();
+	for (unsigned int i = 0; i < _thread_count; ++i) {
+	    _thread_list.push_back(std::thread(&ThreadPool::threadEntry, this));
 	}
 	
-	lock_.unlock();
+	_lock.unlock();
     }
     
     void stop()
     {
-	lock_.lock();
+	_lock.lock();
 	
 	stop_ = true;
 	
-	lock_.unlock();
+	_lock.unlock();
     }
     
-    void addWork(task_st& task)
+    void addWork(work_fn task)
     {
-	lock_.lock();
+	_lock.lock();
 	
-	task_list_.push(task);
-	mon_.notify_one();
+	_task_list.push(task);
+	_mon.notify_one();
 	
-	lock_.unlock();
-    }
-    
-    void addWork(void (*fp)())
-    {
-	task_st task;
-	task.fp = fp;
-	
-	addWork(task);
+	_lock.unlock();
     }
     
 private:
   
     void threadEntry()
     {
-	task_st work;
+	work_fn work;
 	
 	while (true) {
-	    lock_.lock();
-	    std::unique_lock<std::mutex> u_lck(lock_, std::adopt_lock);
+	    _lock.lock();
+	    std::unique_lock<std::mutex> u_lck(_lock, std::adopt_lock);
 	    
-	    while(task_list_.empty()) {
-		if (stop_) {
+	    while(_task_list.empty()) {
+		if (_stop) {
 		    u_lck.unlock();
 		    return;
 		}
 		
-		mon_.wait(u_lck);
+		_mon.wait(u_lck);
 	    }
 	    
-	    work = task_list_.front();
-	    task_list_.pop();
+	    work = _task_list.front();
+	    _task_list.pop();
 	    
 	    u_lck.unlock();
-	    work.fp();
+	    work();
 	}
     }
     
-    std::vector<std::thread> thread_list_;
-    std::queue<task_st> task_list_;
-    std::mutex lock_;
-    std::condition_variable mon_;
-    bool stop_;
-    uint32_t thread_count_;
+    std::vector<std::thread> _thread_list;
+    std::queue<work_fn> _task_list;
+    std::mutex _lock;
+    std::condition_variable _mon;
+    bool _stop;
+    uint32_t _thread_count;
     
 };
 
