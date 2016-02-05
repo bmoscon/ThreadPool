@@ -34,7 +34,7 @@ typedef void (*work_fn)();
 class ThreadPool {
     
 public:
-    ThreadPool() : _mon(), _stop(true), _thread_count(0) {}
+    ThreadPool() : _stop(true), _thread_count(0) {}
     ThreadPool(uint32_t t) : _stop(true), _thread_count(t) {}
     ~ThreadPool();
     
