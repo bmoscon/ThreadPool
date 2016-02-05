@@ -35,7 +35,7 @@ class ThreadPool {
     
 public:
     ThreadPool() : _mon(), _stop(true), _thread_count(0) {}
-    ThreadPool(uint32_t t) : stop_(true), _thread_count(t) {}
+    ThreadPool(uint32_t t) : _stop(true), _thread_count(t) {}
     ~ThreadPool();
     
     void start();
@@ -43,7 +43,7 @@ public:
     void add_work(work_fn task);
     
 private:
-    void threadEntry();
+    void thread_entry();
     
     std::vector<std::thread> _thread_list;
     std::queue<work_fn> _task_list;

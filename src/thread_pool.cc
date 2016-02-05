@@ -48,6 +48,7 @@ void ThreadPool::stop()
     _lock.lock();
     
     _stop = true;
+    _mon.notify_all();
     
     _lock.unlock();
 }

@@ -42,5 +42,6 @@ int main() {
     pool.start();
     
     sleep(3);
+    pool.stop();
     return(0);
 }
