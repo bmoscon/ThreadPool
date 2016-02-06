@@ -26,5 +26,3 @@ Stop will be called automatically when the thread pool is destroyed. Stop and th
 
 
 Thread Pool defaults the worker count to the number of CPUs available on the machine, or you can specify a worker count when constructed.
-
-```
